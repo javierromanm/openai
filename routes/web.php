@@ -16,20 +16,38 @@ use Illuminate\Support\Facades\Http;
 
 Route::get('/', function () {
 
+    $messages = [
+        [
+            "role" => "system",
+            "content" => "You are a poetic assistant, skilled in explaining complex programming concepts with creative flair."
+        ],
+        [
+            "role" => "user",
+            "content" => "Compose a poem that explains the concept of laravel framework."
+        ]
+        ];
+
     $reply = Http::withToken(config('services.openai.secret'))
         ->post('https://api.openai.com/v1/chat/completions', [
             "model" => "gpt-3.5-turbo",
-            "messages" => [
-                [
-                    "role" => "system",
-                    "content" => "You are a poetic assistant, skilled in explaining complex programming concepts with creative flair."
-                ],
-                [
-                    "role" => "user",
-                    "content" => "Compose a poem that explains the concept of laravel framework."
-                ]
-            ]
+            "messages" => $messages
     ])->json('choices.0.message.content');
 
-    return view('welcome', ['reply' => $reply]);
+    $messages[] = [
+        "role" => "assistant",
+        "content" => $reply
+    ];
+
+    $messages[] = [
+        "role" => "user",
+        "content" => "Can you make it sarcastic?"
+    ];
+
+    $secondReply = Http::withToken(config('services.openai.secret'))
+        ->post('https://api.openai.com/v1/chat/completions', [
+            "model" => "gpt-3.5-turbo",
+            "messages" => $messages
+    ])->json('choices.0.message.content');
+
+    return view('welcome', ['reply' => $secondReply]);
 });
