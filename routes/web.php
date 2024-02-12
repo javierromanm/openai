@@ -26,3 +26,23 @@ Route::get('/', function () {
 
     return view('welcome', ['reply' => $response]);
 });
+
+Route::get('/speech', function () {
+
+    return view('speech');
+});
+
+Route::post('/speech', function () {
+    $attributes = request()->validate(['topic' => ['required', 'string', 'min:2', 'max:50']]);
+    $chat = new Chat();
+    $mp3 = $chat->say(
+        message: 'Can you create a poem about ' . $attributes['topic'],
+        speech: true
+    );
+    $file = '/audio/' . md5($mp3) . '.mp3';
+    file_put_contents(public_path($file), $mp3);
+    return redirect('/speech')->with([
+        'file' => $file,
+        'flash' => 'Poem created'
+    ]);
+});
