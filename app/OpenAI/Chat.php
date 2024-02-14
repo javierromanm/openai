@@ -10,27 +10,36 @@ class Chat
 
     protected array $messages = [];
 
+    public function __construct(array $messages = [])
+    {
+        $this->messages = $messages;
+    }
+
     public function messages()
     {
         return $this->messages;
     }
 
-    public function assistant(string $message): static
+    protected function addMessage(string $message, string $role = 'user'): self
     {
         $this->messages[] = [
-            "role" => "system",
-            "content" => $message
+            'role' => $role,
+            'content' => $message
         ];
+
+        return $this;
+    }
+
+    public function assistant(string $message): static
+    {
+        $this->addMessage($message, 'system');
 
         return $this;
     }
 
     public function say(string $message, bool $speech = false): ?string
     {
-        $this->messages[] = [
-            "role" => "user",
-            "content" => $message
-        ];
+        $this->addMessage($message);
 
         $response = OpenAI::chat()->create(
             [
@@ -39,10 +48,7 @@ class Chat
             ])->choices[0]->message->content;
         
         if ($response) {
-            $this->messages[] = [
-                "role" => "assistant",
-                "content" => $response
-            ];
+            $this->addMessage($response, 'assistant');
         }        
 
         return $speech ? $this->speech($response) : $response;
@@ -56,6 +62,24 @@ class Chat
             'voice' => 'echo',
             'input' => $message
         ]);
+    }
+
+    public function visualize(string $description, array $options = []): string
+    {  
+        $this->addMessage($description);
+
+        $description = collect($this->messages)->where('role', 'user')->pluck('content')->implode(' ');
+
+        $options = array_merge([
+            'prompt' => $description,
+            'model' => 'dall-e-3'
+        ], $options);
+
+        $url = OpenAI::images()->create($options)->data[0]->url;
+
+        $this->addMessage($url, 'assistant');
+
+        return $url;
     }
     
 }

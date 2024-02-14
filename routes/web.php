@@ -2,6 +2,7 @@
 
 use App\OpenAI\Chat;
 use Illuminate\Support\Facades\Route;
+use OpenAI\Laravel\Facades\OpenAI;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,6 +16,10 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
+    return view('welcome');
+})->name('home');
+
+Route::get('/text', function () {
 
     $chat = new Chat();
 
@@ -24,13 +29,13 @@ Route::get('/', function () {
 
     $response = $chat->say('Can you make it sarcastic?');
 
-    return view('welcome', ['reply' => $response]);
-});
+    return view('text', ['reply' => $response]);
+})->name('text');
 
 Route::get('/speech', function () {
 
     return view('speech');
-});
+})->name('speech');
 
 Route::post('/speech', function () {
     $attributes = request()->validate(['topic' => ['required', 'string', 'min:2', 'max:50']]);
@@ -45,4 +50,29 @@ Route::post('/speech', function () {
         'file' => $file,
         'flash' => 'Poem created'
     ]);
+});
+
+Route::get('/images', function () {
+    return view('images', [
+        'messages' => session('messages', [])
+    ]);
+})->name('images');
+
+Route::post('/images', function () {
+    $attributes = request()->validate([
+        'description' => ['required', 'string', 'min:3']
+    ]);
+
+    $chat = new Chat(session('messages', []));
+
+    $url = $chat->visualize($attributes['description']);
+
+    session(['messages' => $chat->messages()]);
+    
+    return redirect('/images');
+});
+
+Route::post('/reset', function () {
+    session()->forget('messages');  
+    return redirect('/images');
 });

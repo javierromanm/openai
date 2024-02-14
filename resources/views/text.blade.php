@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Open AI Speech Generation</title>
+    <title>Open AI Text</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-100">   
+<body class="bg-slate-100">
     <nav class="bg-white border-gray-200 dark:bg-gray-900">
         <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
             <a href="{{ route('home') }}" class="flex items-center space-x-3 rtl:space-x-reverse">
@@ -24,11 +24,11 @@
                 <a href="{{ route('home') }}" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Home</a>
                 </li>
                 <li>
-                <a href="{{ route('text') }}" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Text</a>
-                </li>
-                <li>
-                <a href="{{ route('speech') }}" class="block py-2 px-3 text-white bg-blue-700 rounded md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500" aria-current="page">Speech</a>
+                <a href="{{ route('text') }}" class="block py-2 px-3 text-white bg-blue-700 rounded md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500" aria-current="page">Text</a>
                 </li>     
+                <li>
+                <a href="{{ route('speech') }}" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Speech</a>
+                </li>
                 <li>
                 <a href="{{ route('images') }}" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Images</a>
                 </li> 
@@ -36,26 +36,9 @@
             </div>
         </div>
     </nav>
-
+    
     <div class="h-full grid place-items-center p-6">
-        @if(session('file'))
-            <div>
-                <audio controls>
-                    <source src="{{ asset(session('file')) }}" type="audio/mpeg">
-                    Your browser does not support the audio element.
-                </audio>
-                <a href="{{ asset(session('file')) }}" download class="block p-2 w-full text-center rounded bg-gray-200 hover:bg-blue-500 hover:text-white mt-3">Download audio</a>
-            </div>
-        @else
-            <form action="/speech" method="POST" class="w-full lg:max-w-md lg:max-auto">
-                @csrf
-                <div class="flex gap-2">
-                    <input name="topic" type="text" placeholder="What topic would you like?" class="border p-2 rounded flex-1">
-                    <button type="submit" class="p-2 rounded bg-gray-200 hover:bg-blue-500 hover:text-white">Create audio poem</button>
-                </div>        
-            </form>
-        @endif
-    </div>
-
+        {!! nl2br($reply) !!}
+    </div>    
 </body>
 </html>
