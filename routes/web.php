@@ -76,3 +76,38 @@ Route::post('/reset', function () {
     session()->forget('messages');  
     return redirect('/images');
 });
+
+Route::get('/spam', function () {
+    return view('spam', ['spam' => session('spam', '')]);
+})->name('spam');
+
+Route::post('/spam', function () {
+    $attributes = request()->validate([
+        'body' => ['required', 'string']
+    ]);
+
+    $response = OpenAI::chat()->create([
+        'model' => 'gpt-3.5-turbo-1106',
+        'messages' => [
+            ['role' => 'assistant', 'content' => 'You are a forum moderator designed to always output json'],
+            [
+                'role' => 'user',
+                'content' => <<<EOT
+                    Can you tell me if the following text is spam?
+
+
+                    {$attributes['body']}
+                    Expected response example:
+                    {"is_spam": true|false}
+                    EOT
+            ]
+        ],
+        'response_format' => ['type' => 'json_object']
+    ])->choices[0]->message->content;
+
+    $response = json_decode($response);
+
+    $spam = $response->is_spam ? 'TEXT IS SPAM' : 'TEXT IS NOT SPAM';
+
+    return redirect('/spam')->with(['spam' => $spam]);
+});

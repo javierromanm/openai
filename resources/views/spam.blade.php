@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Open AI Image Generation</title>
+    <title>Open AI Spam Detector</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-100">       
@@ -31,11 +31,11 @@
             <a href="{{ route('speech') }}" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Speech</a>
             </li>
             <li>
-            <a href="{{ route('images') }}" class="block py-2 px-3 text-white bg-blue-700 rounded md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500" aria-current="page">Images</a>
-            </li>    
+            <a href="{{ route('images') }}" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Images</a>
+            </li> 
             <li>
-            <a href="{{ route('spam') }}" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Spam</a>
-            </li>        
+            <a href="{{ route('spam') }}" class="block py-2 px-3 text-white bg-blue-700 rounded md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500" aria-current="page">Spam</a>
+            </li>    
         </ul>
         </div>
     </div>
@@ -43,38 +43,25 @@
 
     <div class="flex gap-6 mx-auto max-w-3xl bg-white py-6 px-10 rounded-xl mt-5">
         <div>
-            <h1 class="font-bold mb-4">Generate an image</h1>
-            <form action="/images" method="POST" class="w-full lg:max-w-md lg:max-auto">
+            <h1 class="font-bold mb-4">Detect spam</h1>
+            <form action="/spam" method="POST" class="w-full lg:max-w-md lg:max-auto">
                 @csrf                
                 <textarea 
-                    name="description" 
+                    name="body" 
                     cols="30"
                     rows="5" 
                     placeholder="Description of the image" 
                     class="border border-gray-600 text-xs p-2 rounded"
                 ></textarea>
                 <p class="mt-2">
-                    <button type="submit" class="border border-black px-2 rounded bg-gray-200 hover:bg-blue-500 hover:text-white">Create image</button>   
-                </p>
-            </form>
-            <form action="/reset" method="POST" class="w-full lg:max-w-md lg:max-auto">
-                @csrf  
-                <p class="mt-2">
-                    <button type="submit" class="border border-black px-2 rounded bg-gray-200 hover:bg-blue-500 hover:text-white">Reset previous messages</button>   
+                    <button type="submit" class="border border-black px-2 rounded bg-gray-200 hover:bg-blue-500 hover:text-white">Detect spam</button>   
                 </p>
             </form>
         </div>
-        <div>
-            @if(count($messages))
-                <div class="space-y-6">
-                    @foreach(array_chunk($messages,2) as $chunk)
-                        <div>
-                            <p class="font-bold text-sm mb-1">{{ $chunk[0]['content'] }}</p>
-                            <img src="{{ $chunk[1]['content'] }}" alt="" style="max-width: 250px">                            
-                        </div>
-                    @endforeach                    
-                </div>                
-            @endif
+        <div>            
+            <div>
+                <p class="font-bold">{{ $spam }}</p>                      
+            </div>                   
         </div>
     </div>     
 </body>
