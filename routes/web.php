@@ -1,8 +1,8 @@
 <?php
 
 use App\OpenAI\Chat;
+use App\Rules\SpamFree;
 use Illuminate\Support\Facades\Route;
-use OpenAI\Laravel\Facades\OpenAI;
 
 /*
 |--------------------------------------------------------------------------
@@ -78,36 +78,17 @@ Route::post('/reset', function () {
 });
 
 Route::get('/spam', function () {
-    return view('spam', ['spam' => session('spam', '')]);
+    return view('spam', ['body' => session('body', '')]);
 })->name('spam');
 
 Route::post('/spam', function () {
     $attributes = request()->validate([
-        'body' => ['required', 'string']
+        'body' => [
+            'required',
+            'string',
+            new SpamFree()
+        ]
     ]);
 
-    $response = OpenAI::chat()->create([
-        'model' => 'gpt-3.5-turbo-1106',
-        'messages' => [
-            ['role' => 'assistant', 'content' => 'You are a forum moderator designed to always output json'],
-            [
-                'role' => 'user',
-                'content' => <<<EOT
-                    Can you tell me if the following text is spam?
-
-
-                    {$attributes['body']}
-                    Expected response example:
-                    {"is_spam": true|false}
-                    EOT
-            ]
-        ],
-        'response_format' => ['type' => 'json_object']
-    ])->choices[0]->message->content;
-
-    $response = json_decode($response);
-
-    $spam = $response->is_spam ? 'TEXT IS SPAM' : 'TEXT IS NOT SPAM';
-
-    return redirect('/spam')->with(['spam' => $spam]);
+    return redirect('/spam')->with(['body' => $attributes['body']]);
 });

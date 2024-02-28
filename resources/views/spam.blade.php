@@ -56,11 +56,18 @@
                 <p class="mt-2">
                     <button type="submit" class="border border-black px-2 rounded bg-gray-200 hover:bg-blue-500 hover:text-white">Detect spam</button>   
                 </p>
+                @if($errors->any())
+                    <ul class="mt-2">
+                        @foreach($errors->all() as $error)
+                            <li class="text-sm text-red-500">{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                @endif
             </form>
         </div>
         <div>            
             <div>
-                <p class="font-bold">{{ $spam }}</p>                      
+                <p class="font-bold">{{ $body }}</p>                      
             </div>                   
         </div>
     </div>     
