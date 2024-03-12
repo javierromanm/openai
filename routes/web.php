@@ -1,6 +1,7 @@
 <?php
 
 use App\OpenAI\Chat;
+use App\OpenAI\Assistant;
 use App\Rules\SpamFree;
 use Illuminate\Support\Facades\Route;
 use OpenAI\Laravel\Facades\OpenAI;
@@ -95,41 +96,15 @@ Route::post('/spam', function () {
 });
 
 Route::get('/assistant', function () {
-    $file = OpenAI::files()->upload([
-        'purpose' => 'assistants',
-        'file' => fopen(base_path('routes/api.php'), 'rb')
-    ]);
-    $assistant = OpenAI::assistants()->create([
-        'name' => 'Programming teacher',
-        'instructions' => 'You are a programming teacher',
-        'model' => 'gpt-4-turbo-preview',
-        'tools' => [
-            ['type' => 'retrieval']
-        ],
-        'file_ids' => [
-            $file->id
-        ]
-    ]);
-    $run = OpenAI::threads()->createAndRun([
-        'assistant_id' => $assistant->id,
-        'thread' => [
-            'messages' => [
-                ['role' => 'user', 'content' => 'Can you please tell me the routes you see?']
-            ]
-        ]        
-    ]);
 
-    do {
-        sleep(1);
-        $run = OpenAI::threads()->runs()->retrieve(
-            threadId: $run->threadId,
-            runId: $run->id
-        );
-    } while ($run->status !== 'completed');
-
-    $message = OpenAI::threads()->messages()->list($run->threadId)->data[0]->content[0]->text->value;
-
-    return view('assistant', ['message' => $message]);
+    $assistant = new Assistant(config('openai.assistants.programming.id'));
+    
+    $messages = $assistant->createThread()
+        ->say('Hello.')
+        ->say('Can you please tell me the routes you see?')
+        ->run();
+        
+    return view('assistant', ['message' => $messages->data[0]->content[0]->text->value]);
 
 })->name('assistant');
 

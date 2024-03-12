@@ -25,4 +25,10 @@ return [
     */
 
     'request_timeout' => env('OPENAI_REQUEST_TIMEOUT', 30),
+
+    'assistants' => [
+        'programming' => [
+            'id' => env('OPENAI_PROGRAMMING_ASSISTANT_ID')
+        ]
+    ]
 ];
