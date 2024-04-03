@@ -8,46 +8,47 @@ class Assistant
 {
     protected $assistant;
     protected string $threadId;
+    protected OpenAIClient $client;
 
-    public function __construct(string $assistantId)
+    public function __construct(string $assistantId, ?AIClient $client = null)
     {
-        $this->assistant = OpenAI::assistants()->retrieve($assistantId);        
+        $this->client = $client ?? new OpenAIClient();
+        $this->assistant = $this->client->retreiveAssistant($assistantId);        
     }
 
     public static function create(array $config = [])
     {
-        $assistant = OpenAI::assistants()->create(array_merge_recursive([
+        $client = new Client();
+
+        $defaultConfig = [
             'name' => 'Programming teacher',
             'instructions' => 'You are a programming teacher',
             'model' => 'gpt-4-turbo-preview',
             'tools' => [
                 ['type' => 'retrieval']
             ]
-        ], $config));
+        ];
+
+        $assistant = $client->createAssistant(array_merge_recursive($defaultConfig, $config));
 
         return new static($assistant->id);
     }
 
     public function messages()
     {
-        return OpenAI::threads()->messages()->list($this->threadId);
+        return $this->client->messages($this->threadId);
     }
 
     public function upload(string $file): static
     {
-        $file = OpenAI::files()->upload([
-            'purpose' => 'assistants',
-            'file' => fopen($file, 'rb')
-        ]);
-
-        OpenAI::assistants()->files()->create($this->assistant->id, ['file_id' => $file->id]);
+        $this->client->uploadFile($file, $this->assistant->id);
 
         return $this;
     }
 
     public function createThread(array $parameters = []): static
     {
-        $thread = OpenAI::threads()->create($parameters);
+        $thread = $this->client->createThread($parameters);
 
         $this->threadId = $thread->id;
 
@@ -56,29 +57,13 @@ class Assistant
 
     public function say(string $message): static
     {
-        OpenAI::threads()->messages()->create($this->threadId, [
-            'role' => 'user',
-            'content' => $message
-        ]);
+        $this->client->createMessage($message, $this->threadId);
 
         return $this;
     }
 
     public function run()
     {
-        $run = OpenAI::threads()->runs()->create($this->threadId, [
-            'assistant_id' => $this->assistant->id
-        ]);
-
-        do {
-            sleep(1);
-            $run = OpenAI::threads()->runs()->retrieve(
-                threadId: $this->threadId,
-                runId: $run->id
-            );
-        } while ($run->status !== 'completed');
-    
-        return $this->messages();    
+        return $this->client->run($this->threadId, $this->assistant->id);
     }
-
 }

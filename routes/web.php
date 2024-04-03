@@ -4,7 +4,6 @@ use App\OpenAI\Chat;
 use App\OpenAI\Assistant;
 use App\Rules\SpamFree;
 use Illuminate\Support\Facades\Route;
-use OpenAI\Laravel\Facades\OpenAI;
 
 /*
 |--------------------------------------------------------------------------
